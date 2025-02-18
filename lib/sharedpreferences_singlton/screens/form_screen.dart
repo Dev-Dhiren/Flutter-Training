@@ -2,9 +2,11 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_training/sharedpreferences/model/user.dart';
-import 'package:flutter_training/sharedpreferences/screens/detail_screen.dart';
+import 'package:flutter_training/sharedpreferences_singlton/preferences/pref_manager.dart';
+
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'detail_screen.dart';
 
 class FormScreen extends StatefulWidget {
   const FormScreen({super.key});
@@ -134,44 +136,12 @@ class _FormScreenState extends State<FormScreen> {
     double salary = double.tryParse(salaryController.text.trim()) ?? 0.0;
     int age = int.tryParse(ageController.text.trim()) ?? 0;
 
-    // Save data to shared preferences
-    SharedPreferences preferences = await SharedPreferences.getInstance();
-
-    try {
-      /* await preferences.setString('FNAME', fName);
-      await preferences.setString('LNAME', lName);
-      await preferences.setString('EMAIL', email);
-      await preferences.setDouble('SALARY', salary);
-      await preferences.setInt('AGE', age);*/
-
-      // await preferences.remove('EMAIL');
-      // await preferences.clear();
-
-      // create user class object and bind data with it
-      var user = User(
-        fName: fName,
-        lName: lName,
-        age: age,
-        salary: salary,
-        email: email,
-      );
-
-      print('toJson : ${user.toJson()}');
-      print('jsonEncode : ${jsonEncode(user.toJson())}');
-      
-      // store this map as a json String to shared preference
-      await preferences.setString('USER', jsonEncode(user.toJson()));
+    var manager = PrefManager();
 
 
-
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Data saved successfully..')));
-    } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error')));
-    }
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('Data saved successfully..')));
   }
 
   void onDetailBtnClicked() {
