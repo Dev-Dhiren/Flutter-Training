@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_training/sharedpreferences_singlton/model/person.dart';
 import 'package:flutter_training/sharedpreferences_singlton/preferences/pref_manager.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
@@ -136,12 +137,17 @@ class _FormScreenState extends State<FormScreen> {
     double salary = double.tryParse(salaryController.text.trim()) ?? 0.0;
     int age = int.tryParse(ageController.text.trim()) ?? 0;
 
+    var person = Person(fName: fName, lName: lName, age: age, salary: salary, email: email);
     var manager = PrefManager();
 
+    // save person object
+    bool result = await manager.savePerson(person);
 
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('Data saved successfully..')));
+    if(result){
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Data saved successfully..')));
+    }
   }
 
   void onDetailBtnClicked() {

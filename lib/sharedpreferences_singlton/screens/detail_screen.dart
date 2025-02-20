@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_training/sharedpreferences_singlton/model/person.dart';
+import 'package:flutter_training/sharedpreferences_singlton/preferences/pref_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class DetailScreen extends StatefulWidget {
@@ -44,8 +45,9 @@ class _DetailScreenState extends State<DetailScreen> {
     );
   }
 
-  Future<void> _loadData() async {
+  _loadData() {
 
-
+    var manager = PrefManager();
+    person  = manager.getPerson();
   }
 }
