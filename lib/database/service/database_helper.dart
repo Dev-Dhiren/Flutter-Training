@@ -3,8 +3,6 @@ import 'package:sqflite/sqflite.dart';
 
 import '../models/user.dart';
 
-
-
 class DatabaseHelper {
   static final _dbVersion = 1;
 
@@ -58,14 +56,56 @@ class DatabaseHelper {
     );
   }
 
-  Future<void> addUser(User user) async {
-    var db = await getDatabase();
+  /*Future<int> addUser(User user) async {
+    try {
+      var db = await getDatabase();
+      return await db.insert(_tableUser, user.toMap());
+    } catch (e) {
+      // throw exception
+      return -1;
+    }
+  }*/
 
+  Future<void> addUser({
+    required User user,
+    required Function onSuccess,
+    required Function(String) onError,
+  }) async {
+    try {
+      var db = await getDatabase();
+      print(await db.insert(_tableUser, user.toMap()));
+
+      // function calling
+      onSuccess();
+    } catch (e) {
+      // throw exception
+      onError('Error : ${e.toString()}');
+    }
   }
 
-  void deleteUser() {}
+  Future<int> deleteUser(int id) async {
+    // delete from user_table where id = 2
 
-  void updateUser() {}
+    var db = await getDatabase();
+    return await db.delete(_tableUser, where: 'id = ?', whereArgs: [id]);
+  }
 
-  void getUsers() {}
+  Future<int> updateUser(User user) async {
+    var db = await getDatabase();
+    return await db.update(_tableUser, user.toMap(), where: 'id = ?', whereArgs: [user.id]);
+  }
+
+  Future<List<User>> getUsers() async {
+    try {
+      var db = await getDatabase();
+      var mapList = await db.query(_tableUser);
+
+      List<User> userList =
+          mapList.map((element) => User.fromMap(element)).toList();
+
+      return userList;
+    } catch (e) {
+      return [];
+    }
+  }
 }

@@ -19,6 +19,13 @@ class _UserScreenState extends State<UserScreen> {
   DatabaseHelper db = DatabaseHelper();
 
   @override
+  void initState() {
+    super.initState();
+
+    _loadUser();
+  }
+
+  @override
   void dispose() {
     super.dispose();
 
@@ -26,11 +33,94 @@ class _UserScreenState extends State<UserScreen> {
     _emailController.dispose();
   }
 
-  void _insertUser(String name, String email) {
+  Future<void> _insertUser(String name, String email) async {
     User user = User(name: name, email: email);
 
-    db.addUser(user);
+    /* var result = await db.addUser(user);
+    print('result : $result');
+    if (result != -1) {
+      _nameController.clear();
+      _emailController.text = "";
+      print('User added successfully..');
+    } else {
+      print('Error : while inserting');
+    }*/
 
+    db.addUser(
+      user: user,
+      onSuccess: () {
+        _loadUser();
+        print('User added successfully..');
+      },
+      onError: (error) {
+        print(error);
+      },
+    );
+  }
+
+  _editUser(User user) {
+    final nameController = TextEditingController(text: user.name);
+    final emailController = TextEditingController(text: user.email);
+
+    showDialog(
+      context: context,
+      builder:
+          (context) => Dialog(
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+              decoration: BoxDecoration(borderRadius: BorderRadius.circular(3)),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                spacing: 16,
+                children: [
+                  TextField(
+                    controller: nameController,
+                    decoration: InputDecoration(
+                      labelText: "User name",
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+
+                  TextField(
+                    controller: emailController,
+                    decoration: InputDecoration(
+                      labelText: "Email address",
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  Row(
+                    spacing: 16,
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      FilledButton.tonal(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: Text('Cancel'),
+                      ),
+                      FilledButton(
+                        onPressed: () async {
+                          String name = nameController.text.trim();
+                          String email = emailController.text.trim();
+
+                          var result = await db.updateUser(
+                            User(name: name, email: email, id: user.id),
+                          );
+                          Navigator.pop(context);
+                          print('result : $result');
+                          _loadUser();
+
+
+                        },
+                        child: Text('Update'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+    );
   }
 
   @override
@@ -80,8 +170,30 @@ class _UserScreenState extends State<UserScreen> {
               child: ListView.builder(
                 itemCount: users.length,
                 itemBuilder: (context, index) {
+                  User user = users[index];
+
                   return ListTile(
-                    title: Text(users[index].name),
+                    title: Text(user.name),
+                    subtitle: Text(user.email),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          onPressed: () {
+                            _editUser(user);
+                          },
+                          icon: Icon(Icons.edit, color: Colors.grey),
+                        ),
+                        IconButton(
+                          onPressed: () async {
+                            var result = await db.deleteUser(user.id!);
+                            print('result : $result');
+                            _loadUser();
+                          },
+                          icon: Icon(Icons.delete, color: Colors.red),
+                        ),
+                      ],
+                    ),
                     onTap: () {
                       Navigator.push(
                         context,
@@ -96,5 +208,13 @@ class _UserScreenState extends State<UserScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _loadUser() async {
+    var list = await db.getUsers();
+    setState(() {
+      users.clear();
+      users.addAll(list);
+    });
   }
 }
