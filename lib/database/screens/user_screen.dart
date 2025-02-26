@@ -109,8 +109,6 @@ class _UserScreenState extends State<UserScreen> {
                           Navigator.pop(context);
                           print('result : $result');
                           _loadUser();
-
-
                         },
                         child: Text('Update'),
                       ),
@@ -197,7 +195,7 @@ class _UserScreenState extends State<UserScreen> {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => TaskScreen()),
+                        MaterialPageRoute(builder: (context) => TaskScreen(userId: user.id!,)),
                       );
                     },
                   );

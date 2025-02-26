@@ -1,18 +1,47 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_training/database/service/database_helper.dart';
+import 'package:intl/intl.dart';
 
 import '../models/task.dart';
 
 class TaskScreen extends StatefulWidget {
-  const TaskScreen({super.key});
+  int userId;
+
+  TaskScreen({super.key, required this.userId});
 
   @override
   State<TaskScreen> createState() => _TaskScreenState();
 }
 
 class _TaskScreenState extends State<TaskScreen> {
-
-  final TextEditingController _taskController = TextEditingController();
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _descController = TextEditingController();
   List<Task> tasks = [];
+  DatabaseHelper db = DatabaseHelper();
+
+  Future<void> _insertTask(String title, String description) async {
+    var timeStamp = DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
+    var task = Task(
+      title: title,
+      description: description,
+      userId: widget.userId,
+      createdAt: timeStamp,
+    );
+
+    var id = await db.addTask(task);
+
+    if (id != -1) {
+      print('Task added successfully.');
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    _loadTask();
+
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,15 +50,36 @@ class _TaskScreenState extends State<TaskScreen> {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextField(
-              controller: _taskController,
-              decoration: InputDecoration(labelText: "Enter Task"),
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              spacing: 16,
+              children: [
+                TextField(
+                  controller: _titleController,
+                  decoration: InputDecoration(
+                    labelText: "Enter Title",
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                TextField(
+                  controller: _descController,
+                  decoration: InputDecoration(
+                    labelText: "Enter Description",
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ],
             ),
           ),
-          ElevatedButton(onPressed: () {
+          ElevatedButton(
+            onPressed: () {
+              String title = _titleController.text.trim();
+              String description = _descController.text.trim();
 
-          }, child: Text("Add Task")),
+              _insertTask(title, description);
+            },
+            child: Text("Add Task"),
+          ),
           Expanded(
             child: ListView.builder(
               itemCount: tasks.length,
@@ -38,9 +88,7 @@ class _TaskScreenState extends State<TaskScreen> {
                   title: Text(tasks[index].title),
                   trailing: IconButton(
                     icon: Icon(Icons.delete, color: Colors.red),
-                    onPressed: () {
-
-                    },
+                    onPressed: () {},
                   ),
                 );
               },
@@ -49,5 +97,16 @@ class _TaskScreenState extends State<TaskScreen> {
         ],
       ),
     );
+  }
+
+  Future<void> _loadTask() async {
+
+    var list = await db.getTasks(widget.userId);
+    tasks.clear();
+
+   setState(() {
+     tasks.addAll(list);
+   });
+
   }
 }
