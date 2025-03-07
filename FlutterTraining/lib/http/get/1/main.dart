@@ -22,6 +22,9 @@ class UserScreen extends StatefulWidget {
 
 class _UserScreenState extends State<UserScreen> {
   String url = 'https://reqres.in/api/users?page=1';
+  bool isLoading = true;
+
+  List<User> userList = [];
 
   @override
   void initState() {
@@ -30,11 +33,34 @@ class _UserScreenState extends State<UserScreen> {
     _loadUsers();
   }
 
+  _setLoading(bool value) {
+    setState(() {
+      isLoading = value;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Material App Bar')),
-      body: Center(child: Container(child: Text('Hello World'))),
+      body:
+          isLoading
+              ? Center(child: CircularProgressIndicator())
+              : ListView.builder(
+                itemCount: userList.length,
+                itemBuilder: (context, index) {
+                  var user = userList[index];
+
+                  return ListTile(
+                    leading: CircleAvatar(
+                      radius: 35,
+                      backgroundImage: NetworkImage(user.avatar),
+                    ),
+                    title: Text('${user.fName} ${user.lName}'),
+                    subtitle: Text(user.email),
+                  );
+                },
+              ),
     );
   }
 
@@ -49,7 +75,11 @@ class _UserScreenState extends State<UserScreen> {
       UserResponse userResponse = UserResponse.fromJson(jsonDecode(res.body));
       print('user response : $userResponse');
 
+      userList = userResponse.userList;
+
+      _setLoading(false);
     } catch (e) {
+      _setLoading(false);
       print('Error : $e');
     }
   }
