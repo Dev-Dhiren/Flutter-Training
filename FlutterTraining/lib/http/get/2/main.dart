@@ -21,58 +21,70 @@ class AlbumScreen extends StatefulWidget {
 }
 
 class _AlbumScreenState extends State<AlbumScreen> {
-
   String albumUrl = 'https://jsonplaceholder.typicode.com/albums';
+
+  Future<List<Album>>? _futureAlbums;
+
+  _loadAlbums() {
+    setState(() {
+      _futureAlbums = _fetchAlbums();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Albums')),
-      body: FutureBuilder(
-        future: _fetchAlbums(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('${snapshot.error}'));
-          } else if (snapshot.hasData) {
-            var albumList = snapshot.data ?? [];
+      body:
+          _futureAlbums != null
+              ? FutureBuilder(
+                future: _futureAlbums,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text('${snapshot.error}'));
+                  } else if (snapshot.hasData) {
+                    var albumList = snapshot.data ?? [];
 
-            if (albumList.isEmpty) {
-              return Center(child: Text('No Data Found'));
-            } else {
-              return ListView.builder(
-                itemCount: albumList.length,
-                itemBuilder: (context, index) {
-                  Album album = albumList[index];
+                    if (albumList.isEmpty) {
+                      return Center(child: Text('No Data Found'));
+                    } else {
+                      return ListView.builder(
+                        itemCount: albumList.length,
+                        itemBuilder: (context, index) {
+                          Album album = albumList[index];
 
-                  return Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: ListTile(
-                        leading: CircleAvatar(
-                          radius: 30,
-                          backgroundColor: Colors.amber.shade50,
-                          child: Text(
-                            '${album.id}',
-                            style: TextStyle(color: Colors.amber.shade700),
-                          ),
-                        ),
-                        title: Text(album.title),
-                      ),
-                    ),
-                  );
+                          return Card(
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: ListTile(
+                                leading: CircleAvatar(
+                                  radius: 30,
+                                  backgroundColor: Colors.amber.shade50,
+                                  child: Text(
+                                    '${album.id}',
+                                    style: TextStyle(
+                                      color: Colors.amber.shade700,
+                                    ),
+                                  ),
+                                ),
+                                title: Text(album.title),
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    }
+                  } else {
+                    return Center(child: Text('No Data Found'));
+                  }
                 },
-              );
-            }
-          } else {
-            return Center(child: Text('No Data Found'));
-          }
-        },
-      ),
+              )
+              : SizedBox.shrink(),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // _fetchAlbum();
+          _loadAlbums();
         },
         child: Icon(Icons.arrow_downward),
       ),
