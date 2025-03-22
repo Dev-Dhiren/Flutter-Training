@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter_training/http/practical/models/token.dart';
 import 'package:flutter_training/http/practical/models/user.dart';
 import 'package:flutter_training/http/practical/utils/app_constant.dart';
 import 'package:http/http.dart';
@@ -13,6 +14,37 @@ class ApiService {
 
   ApiService._internal();
 
+  // Login User and get access token
+  loginUser({
+    required String email,
+    required String password,
+    required Function(Token) onSuccess,
+    required Function(String) onError,
+  }) {
+    var headers = <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+    };
+
+    var body = {'email': email, 'password': password};
+
+    try {
+      post(Uri.parse(loginUrl), body: jsonEncode(body), headers: headers).then((
+        res,
+      ) {
+        if (res.statusCode == 201) {
+          onSuccess(Token.fromJson(jsonDecode(res.body)));
+
+        } else {
+          var error = _parseErrorMessage(jsonDecode(res.body));
+          onError(error);
+        }
+      });
+    } catch (e) {
+      onError('Error : ${e.toString()}');
+    }
+  }
+
+  // Register Account
   createAccount({
     required String name,
     required String email,
@@ -20,7 +52,7 @@ class ApiService {
     required Function(User) onSuccess,
     required Function(String) onError,
   }) async {
-   /*  User user = User(
+    /*  User user = User(
       name: name,
       email: email,
       password: password,
@@ -34,7 +66,7 @@ class ApiService {
       "name": name,
       "email": email,
       "password": password,
-
+      "avatar": "https://api.lorem.space/image/face?w=640&h=480",
     };
 
     var headers = <String, String>{
@@ -53,7 +85,7 @@ class ApiService {
         User user = User.fromJson(jsonDecode(response.body));
         onSuccess(user);
       } else {
-        var error = _ParseErrorMessage(jsonDecode(response.body));
+        var error = _parseErrorMessage(jsonDecode(response.body));
         onError(error);
       }
     } catch (e) {
@@ -71,7 +103,7 @@ class ApiService {
   }*/
   }
 
-  String _ParseErrorMessage(Map<String, dynamic> errorResponse) {
+  String _parseErrorMessage(Map<String, dynamic> errorResponse) {
     if (errorResponse.containsKey('message')) {
       if (errorResponse['message'] is List) {
         return (errorResponse['message'] as List).join(', ');

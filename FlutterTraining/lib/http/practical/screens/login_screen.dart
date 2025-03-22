@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_training/http/practical/screens/home_screen.dart';
 import 'package:flutter_training/http/practical/screens/signup_screen.dart';
+import 'package:flutter_training/http/practical/service/api_service.dart';
+import 'package:flutter_training/http/practical/storage/secured_storage_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -9,9 +12,33 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final ApiService _service = ApiService();
+  final SecuredStorageService _storage = SecuredStorageService();
 
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+
+  void _userLogin(String email, String password) {
+    _service.loginUser(
+      email: email,
+      password: password,
+      onSuccess: (token) async {
+        // save token to access further api data
+        // save login status
+        await _storage.saveToken(token);
+        await _storage.setLoginStatus(true);
+
+        // navigate to home screen
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => HomeScreen()),
+        );
+      },
+      onError: (error) {
+        print(error);
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,9 +83,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     // Handle Login Logic
                     if (_emailController.text.isNotEmpty &&
                         _passwordController.text.isNotEmpty) {
+                      String email = _emailController.text.trim();
+                      String password = _passwordController.text.trim();
 
-
-
+                      _userLogin(email, password);
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(

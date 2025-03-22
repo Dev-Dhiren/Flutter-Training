@@ -16,7 +16,12 @@ class _SignupScreenState extends State<SignupScreen> {
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
 
+  bool isLoading = false;
+
   void _createAccount(String name, String email, String password) {
+
+    isLoading = true;
+
     _service.createAccount(
       name: name,
       email: email,
