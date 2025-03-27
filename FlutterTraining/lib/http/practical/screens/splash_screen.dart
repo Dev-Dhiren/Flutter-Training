@@ -12,7 +12,7 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  final SecuredStorageService _storage = SecuredStorageService();
+  final StorageService _storage = StorageService();
 
   @override
   void initState() {

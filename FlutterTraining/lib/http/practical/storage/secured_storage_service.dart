@@ -3,14 +3,14 @@ import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_training/http/practical/models/token.dart';
 
-class SecuredStorageService {
-  static SecuredStorageService? _instance;
+class StorageService {
+  static StorageService? _instance;
   late FlutterSecureStorage _storage;
 
   static final String _keyToken = 'token';
   static final String _keyIsLogin = 'isLogin';
 
-  SecuredStorageService._internal(this._storage);
+  StorageService._internal(this._storage);
 
   static AndroidOptions _getAndroidOptions() =>
       const AndroidOptions(encryptedSharedPreferences: true);
@@ -18,8 +18,8 @@ class SecuredStorageService {
   static IOSOptions _getIOSOptions() =>
       const IOSOptions(accessibility: KeychainAccessibility.first_unlock);
 
-  factory SecuredStorageService() {
-    return _instance ??= SecuredStorageService._internal(
+  factory StorageService() {
+    return _instance ??= StorageService._internal(
       FlutterSecureStorage(
         aOptions: _getAndroidOptions(),
         iOptions: _getIOSOptions(),

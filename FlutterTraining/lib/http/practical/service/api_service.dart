@@ -1,12 +1,19 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_training/http/practical/models/category.dart';
+import 'package:flutter_training/http/practical/models/products.dart';
 import 'package:flutter_training/http/practical/models/token.dart';
 import 'package:flutter_training/http/practical/models/user.dart';
+import 'package:flutter_training/http/practical/storage/secured_storage_service.dart';
 import 'package:flutter_training/http/practical/utils/app_constant.dart';
+import 'package:flutter_training/secured_storage/service/secured_storage_service.dart';
 import 'package:http/http.dart';
 
 class ApiService {
   static final ApiService _instance = ApiService._internal();
+  final StorageService _storageService = StorageService();
 
   factory ApiService() {
     return _instance;
@@ -33,7 +40,6 @@ class ApiService {
       ) {
         if (res.statusCode == 201) {
           onSuccess(Token.fromJson(jsonDecode(res.body)));
-
         } else {
           var error = _parseErrorMessage(jsonDecode(res.body));
           onError(error);
@@ -112,6 +118,43 @@ class ApiService {
       }
     } else {
       return 'Unknown error';
+    }
+  }
+
+  Future<List<Categories>> getCategories() async {
+    Token? token = await _storageService.getToken();
+    var headers = {'Authorization': 'Bearer ${token!.accessToken}'};
+
+    Response res = await get(Uri.parse(loadCategories), headers: headers);
+
+    try {
+      if (res.statusCode == 200) {
+        List<dynamic> mapList = jsonDecode(res.body);
+        return mapList.map((e) => Categories.fromJson(e)).toList();
+      } else {
+        return [];
+      }
+    } catch (e) {
+      return [];
+    }
+  }
+
+  Future<List<Products>> getProducts({
+    required int offset,
+    required int limit,
+  }) async {
+    var requestUrl = '$loadProducts/?offset=$offset&limit=$limit';
+    Response res = await get(Uri.parse(requestUrl));
+
+    try {
+      if (res.statusCode == 200) {
+        List<dynamic> mapList = jsonDecode(res.body);
+        return mapList.map((e) => Products.fromJson(e)).toList();
+      } else {
+        return [];
+      }
+    } catch (e) {
+      return [];
     }
   }
 }

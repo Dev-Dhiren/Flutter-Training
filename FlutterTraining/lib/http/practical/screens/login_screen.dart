@@ -13,7 +13,7 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final ApiService _service = ApiService();
-  final SecuredStorageService _storage = SecuredStorageService();
+  final StorageService _storage = StorageService();
 
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
